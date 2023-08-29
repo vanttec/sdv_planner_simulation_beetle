@@ -174,7 +174,7 @@ local_costmap:
         observation_sources: pointcloud
         combination_method: 1
         pointcloud:  # no frame set, uses frame from message
-          topic: /camera/points #use laser scan /scan
+          topic: scan #use laser scan /scan
           max_obstacle_height: 2.0
           min_obstacle_height: 0.1
           obstacle_max_range: 5.0
@@ -338,7 +338,7 @@ ekf_filter_node_odom:
     frequency: 30.0
     sensor_timeout: 0.1
     two_d_mode: true
-    #publish_tf: true 
+    publish_tf: true 
     transform_time_offset: 0.0
     transform_timeout: 0.0
     print_diagnostics: true
@@ -365,28 +365,72 @@ ekf_filter_node_odom:
     odom0_differential: false
     odom0_relative: false
 
-    odom1: gps
+    odom1: sdv_localization/odom #gps
     odom1_config: [true,  true,  false,
                    false, false, false,
                    false, false, false,
-                   false, false, false,
+                   false, false, true,
                    false, false, false]
+    # odom1_config: [true,  true,  false,
+    #                false, false, false,
+    #                true,  true,  false,
+    #                false, false, false,
+    #                false, false, false]
     odom1_queue_size: 10
     odom1_nodelay: true
     odom1_differential: false
     odom1_relative: false
 
-    imu0: imu #change
+    odom2: sdv_localization/odom #gps
+    odom2_config: [true,  true,  false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, true,
+                   false, false, false]
+    # odom2_config: [true,  true,  false,
+    #                false, false, false,
+    #                true,  true,  false,
+    #                false, false, false,
+    #                false, false, false]
+    odom2_queue_size: 10
+    odom2_nodelay: true
+    odom2_differential: false
+    odom2_relative: false
+
+    imu0: vectornav/imu #imu #change
     imu0_config: [false, false, false,
                   true,  true,  true,
                   false, false, false,
                   true,  true,  true,
                   true,  true,  true]
+    # imu0_config: [false, false, false,
+    #               true,  true,  true,
+    #               false, false, false,
+    #               true,  true,  true,
+    #               true,  true,  true]
     imu0_nodelay: false
     imu0_differential: false
     imu0_relative: false
     imu0_queue_size: 10
     imu0_remove_gravitational_acceleration: true
+
+    imu1: vectornav/imu #imu #change
+    imu1_config: [false, false, false,
+                  true,  true,  true,
+                  false, false, false,
+                  true,  true,  true,
+                  true,  true,  true]
+    # imu1_config: [false, false, false,
+    #               true,  true,  true,
+    #               false, false, false,
+    #               true,  true,  true,
+    #               true,  true,  true]
+    imu1_nodelay: false
+    imu1_differential: false
+    imu1_relative: false
+    imu1_queue_size: 10
+    imu1_remove_gravitational_acceleration: true
+
 
     use_control: false
 

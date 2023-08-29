@@ -185,7 +185,7 @@ def generate_launch_description():
     
 
     start_mock_transformation = Node(
-        #condition=UnlessCondition(use_ekf),
+        condition=UnlessCondition(use_ekf),
         package='map_odom_static_broadcaster',
         executable='map_odom_static_broadcaster',
         name='map_odom_static_broadcaster',
