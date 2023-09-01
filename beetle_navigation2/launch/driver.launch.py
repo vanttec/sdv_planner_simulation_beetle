@@ -26,8 +26,8 @@ def generate_launch_description():
 
     #robot_description = Command(['xacro ', os.path.join(beetle_desc_dir, 'urdf/beetle.urdf'),
     #                            ' beetle_controller_yaml_file:=', params_file])
-    robot_description = Command(['xacro ', os.path.join(beetle_desc_dir, 'urdf/sdv.urdf'),
-                               ' beetle_controller_yaml_file:=', params_file])
+    # robot_description = Command(['xacro ', os.path.join(beetle_desc_dir, 'urdf/sdv.urdf'),
+    #                            ' beetle_controller_yaml_file:=', params_file])
     
     # Define launch arguments
     declare_use_rviz_cmd = DeclareLaunchArgument(
@@ -41,13 +41,13 @@ def generate_launch_description():
         description='Absolute path to rviz config file')
 
     # Define actions
-    start_micro_ros_agent = Node(
-        package='micro_ros_agent',
-        executable='micro_ros_agent',
-        name='micro_ros_agent',
-        arguments=[
-            "serial", "--dev", DEVICE,
-            "--baudrate", str(BAUDRATE), "-v6"])
+    # start_micro_ros_agent = Node(
+    #     package='micro_ros_agent',
+    #     executable='micro_ros_agent',
+    #     name='micro_ros_agent',
+    #     arguments=[
+    #         "serial", "--dev", DEVICE,
+    #         "--baudrate", str(BAUDRATE), "-v6"])
     start_msg_forwarder = Node(
         package='beetle_msg_forwarder',
         executable='beetle_msg_forwarder',
@@ -57,12 +57,12 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         parameters=[{'use_sim_time': False}])
-    start_robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        output='screen',
-        parameters=[{'use_sim_time': False,
-                     'robot_description': robot_description}])
+    # start_robot_state_publisher = Node(
+    #     package='robot_state_publisher',
+    #     executable='robot_state_publisher',
+    #     output='screen',
+    #     parameters=[{'use_sim_time': False,
+    #                  'robot_description': robot_description}])
     start_rviz = Node(
         condition=IfCondition(use_rviz),
         package='rviz2',
@@ -85,10 +85,10 @@ def generate_launch_description():
     # Register event handlers
 
     # Add actions
-    ld.add_action(start_micro_ros_agent)
+    # ld.add_action(start_micro_ros_agent)
     ld.add_action(start_msg_forwarder)
     ld.add_action(start_joint_state_publisher)
-    ld.add_action(start_robot_state_publisher)
+    # ld.add_action(start_robot_state_publisher)
     ld.add_action(start_rviz)
 
     return ld
