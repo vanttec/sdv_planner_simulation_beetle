@@ -23,7 +23,9 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration('use_rviz')
     params_file = LaunchConfiguration('params_file')
     rviz_config_file = LaunchConfiguration('rviz_config_file')
-
+    robot_description = os.path.join(beetle_desc_dir, 'urdf/sdv.urdf')
+    with open(robot_description, 'r') as infp:
+       robot_desc = infp.read()
     #robot_description = Command(['xacro ', os.path.join(beetle_desc_dir, 'urdf/beetle.urdf'),
     #                            ' beetle_controller_yaml_file:=', params_file])
     # robot_description = Command(['xacro ', os.path.join(beetle_desc_dir, 'urdf/sdv.urdf'),
@@ -57,12 +59,15 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         parameters=[{'use_sim_time': False}])
-    # start_robot_state_publisher = Node(
-    #     package='robot_state_publisher',
-    #     executable='robot_state_publisher',
-    #     output='screen',
-    #     parameters=[{'use_sim_time': False,
-    #                  'robot_description': robot_description}])
+    start_robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        output='screen',
+        # parameters=[{'use_sim_time': False,
+        #              'robot_description': robot_description}])
+        parameters=[{'use_sim_time': False, 'robot_description': robot_desc}],
+          arguments=[robot_description])
+
     start_rviz = Node(
         condition=IfCondition(use_rviz),
         package='rviz2',
@@ -85,10 +90,10 @@ def generate_launch_description():
     # Register event handlers
 
     # Add actions
-    # ld.add_action(start_micro_ros_agent)
+    #ld.add_action(start_micro_ros_agent)
     ld.add_action(start_msg_forwarder)
     ld.add_action(start_joint_state_publisher)
-    # ld.add_action(start_robot_state_publisher)
-    ld.add_action(start_rviz)
+    ld.add_action(start_robot_state_publisher)
+    #ld.add_action(start_rviz)
 
     return ld

@@ -15,21 +15,21 @@ amcl:
     lambda_short: 0.1
     laser_likelihood_max_dist: 4.0 #2.0
     laser_max_range: 100.0
-    laser_min_range: -1.0
+    laser_min_range: -1.0 #0.02
     laser_model_type: "likelihood_field"
-    max_beams: 60
-    max_particles: 2000
+    max_beams: 100  #60
+    max_particles: 4000 #2000
     min_particles: 500
     odom_frame_id: "odom"
     pf_err: 0.05
     pf_z: 0.99
-    recovery_alpha_fast: 0.1 #0.0
-    recovery_alpha_slow: 0.001 #0.0
+    recovery_alpha_fast: 0.0
+    recovery_alpha_slow: 0.0
     resample_interval: 1
     robot_model_type: "nav2_amcl::OmniMotionModel"
     save_pose_rate: 0.5
     sigma_hit: 0.2
-    tf_broadcast: true
+    tf_broadcast: true  #false
     transform_tolerance: 1.0
     update_min_a: 0.2
     update_min_d: 0.25
@@ -38,6 +38,7 @@ amcl:
     z_rand: 0.5
     z_short: 0.05
     scan_topic: scan
+    map_topic: map #map2
 
 bt_navigator:
   ros__parameters:
@@ -204,7 +205,7 @@ global_costmap:
       static_map: true
       width: 1920
       height: 1080
-      resolution: 1.0
+      resolution: 0.8 #1.0
       track_unknown_space: False
       plugins: ["static_layer", "inflation_layer"]
       static_layer:
@@ -225,9 +226,15 @@ map_server:
     use_sim_time: True
     # Overridden in launch by the "map" launch configuration or provided default value.
     # To use in yaml, remove the default "map" value in the tb3_simulation_launch.py file & provide full path to map below.
-    #yaml_filename: "/home/khanh/git-projects/ros2-workspace/install/beetle_navigation2/share/beetle_navigation2/maps/map.yaml"
-    yaml_filename: "/catkin_ws/src/vanttec_sdv/docker_ws/sdv_localization/sdv_localization/maps/carreta_map.yaml"
-  
+    #yaml_filename: "/home/khanh/git-projects/ros2-workspace/install/beetle_navigation2/share/beetle_navigation2/maps/map.yaml" 
+    #yaml_filename: "/catkin_ws/src/beetle/beetle_navigation2/maps/andres_map.yaml" 
+    yaml_filename: "sdv_localization/sdv_localization/maps/carreta_raw_map.yaml" 
+
+# map_server:
+#   ros__parameters:
+#     use_sim_time: True
+#     yaml_filename: "sdv_localization/sdv_localization/maps/carreta_map.yaml"
+
 #modifications in params, bringuo and nav.launch
 map_saver:
   ros__parameters:
@@ -264,8 +271,9 @@ planner_server:
       lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
       cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
-  
-  
+
+      map_topic: map
+
       smoother:
         max_iterations: 1000
         w_smooth: 0.3
@@ -350,7 +358,7 @@ ekf_filter_node_odom:
     frequency: 30.0
     sensor_timeout: 0.1
     two_d_mode: true
-    publish_tf: true
+    publish_tf: false
     transform_time_offset: 0.0
     transform_timeout: 0.0
     print_diagnostics: true
@@ -365,172 +373,40 @@ ekf_filter_node_odom:
     map_frame: map
     odom_frame: odom
     base_link_frame: base_link
-    world_frame: odom
-
-
-   # odom0: amcl
-   # odom0_config: [false, false, false,
-   #                false, false, false,
-   #                true,  true,  true,
-   #                false, false, true,
-   #                false, false, false]
-   # odom0_queue_size: 10
-   # odom0_nodelay: true
-   # odom0_differential: false
-   # odom0_relative: false
-
-
-    imu0: vectornav/imu #imu #change
-    imu0_config: [false, false, false,
-                  false,  false,  false,
-                  true, true, false,
-                  false,  false,  true,
-                  true,  true,  false]
-    # imu0_config: [false, false, false,
-    #               true,  true,  true,
-    #               false, false, false,
-    #               true,  true,  true,
-    #               true,  true,  true]
-    imu0_nodelay: false
-    imu0_differential: true
-    imu0_relative: false
-    imu0_queue_size: 10
-    imu0_remove_gravitational_acceleration: true
-  
-
-    imu1: sbg/imu/data #imu #change
-    imu1_config: [false, false, false,
-                  false,  false,  true,
-                  true, true, false,
-                  false,  false,  true,
-                  true,  true,  false]
-    # imu1_config: [false, false, false,
-    #               true,  true,  true,
-    #               false, false, false,
-    #               true,  true,  true,
-    #               true,  true,  true]
-    imu1_nodelay: false
-    imu1_differential: false
-    imu1_relative: true
-    imu1_queue_size: 10
-    imu1_remove_gravitational_acceleration: true
-  
-
-    use_control: false
-  
-  
-    process_noise_covariance: [0.01,   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.01,   0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01]
-  
-  
-    initial_estimate_covariance: [0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.01,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.01,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.01]
-
-
-ekf_filter_node_map: #here is where i have to modify it, would it require the joint_state publisher?, it was originally simulated with no real imu source
-  ros__parameters:
-    use_sim_time: True
-    frequency: 30.0
-    sensor_timeout: 0.1
-    two_d_mode: true
-    #publish_tf: false  # Disable publishing of transforms
-    transform_time_offset: 0.0
-    transform_timeout: 0.0
-    print_diagnostics: true
-    debug: false
-  
-  
-    map_frame: map
-    odom_frame: odom
-    base_link_frame: base_link
     world_frame: map
-  
-  
-    odom0: odometry/local
+    
+    odom0: sdv_localization/vectornav/odom
     odom0_config: [false, false, false,
-                  false, false, false,
-                  true,  true,  false,
-                  false, false, true,
-                  true, true, false]
+                   false, false, false,
+                   true,  false,  false,
+                   false, false, false,
+                   false, false, false]
     odom0_queue_size: 10
     odom0_nodelay: true
     odom0_differential: false
     odom0_relative: false
-  
-  
-    odom1: sdv_localization/vectornav/odom #gps
-    odom1_config: [true,  true,  false,
-                  false, false, false,
-                  false, false, false,
-                  false, false, false,
-                  false, false, false]
-    # odom1_config: [true,  true,  false,
-    #                false, false, false,
-    #                true,  true,  false,
-    #                false, false, false,
-    #                false, false, false]
-    odom1_queue_size: 10
-    odom1_nodelay: true
-    odom1_differential: false
-    odom1_relative: false
-  
-    odom2: sdv_localization/sbg/odom #gps
-    odom2_config: [true,  true,  false,
-                  false, false, false,
-                  false, false, false,
+    
+    pose0: amcl_pose_ned
+    pose0_config: [true,  true, false,
+                   false, false, false,
+                   false,  false,  false,
                   false, false, false,
                   false, false, false]
-    # odom2_config: [true,  true,  false,
-    #                false, false, false,
-    #                true,  true,  false,
-    #                false, false, false,
-    #                false, false, false]
-    odom2_queue_size: 10
-    odom2_nodelay: true
-    odom2_differential: false
-    odom2_relative: false
-  
-    imu0: vectornav/imu #imu #change
+    pose0_queue_size: 10
+    pose0_nodelay: true
+    pose0_differential: true
+    pose0_relative: false
+
+    imu0: vectornav/imu
     imu0_config: [false, false, false,
-                  false,  false,  false,
-                  true, true, false,
-                  false,  false,  true,
-                  true,  true,  false]
-    # imu0_config: [false, false, false,
-    #               true,  true,  true,
-    #               false, false, false,
-    #               true,  true,  true,
-    #               true,  true,  true]
-    imu0_nodelay: false
-    imu0_differential: true
-    imu0_relative: false
+                   false, false, true,
+                   false,  false,  false,
+                   false, false, false,
+                   true, false, false]
     imu0_queue_size: 10
+    imu0_nodelay: true
+    imu0_differential: false
+    imu0_relative: false
     imu0_remove_gravitational_acceleration: true
   
   
@@ -552,45 +428,159 @@ ekf_filter_node_map: #here is where i have to modify it, would it require the jo
     imu1_remove_gravitational_acceleration: true
   
 
-
+    # imu1: sbg/imu/data
+    # imu1_config: [false, false, false,
+    #               false,  false,  true,
+    #               true, false, false,
+    #               false,  false,  false,
+    #               true,  false,  false]
+    # imu1_nodelay: false
+    # imu1_differential: false
+    # imu1_relative: false
+    # imu1_queue_size: 10
+    # imu1_remove_gravitational_acceleration: true
 
     use_control: false
-  
-  
-    process_noise_covariance: [0.01,   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.01,   0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,
-                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,
+
+    odom0_covariance: [1e-3, 0, 0, 0, 0, 0,
+                        0, 1e-3, 0, 0, 0, 0,
+                        0, 0, 1e-3, 0, 0, 0,
+                        0, 0, 0, 1e-6, 0, 0,
+                        0, 0, 0, 0, 1e-6, 0,
+                        0, 0, 0, 0, 0, 1e-6]
+
+    imu0_covariance: [1e-6, 0, 0, 0, 0, 0,
+                        0, 1e-6, 0, 0, 0, 0,
+                        0, 0, 1e-6, 0, 0, 0,
+                        0, 0, 0, 1e-6, 0, 0,
+                        0, 0, 0, 0, 1e-6, 0,
+                        0, 0, 0, 0, 0, 1e-6]
+
+    pose0_covariance: [1e-2, 0, 0, 0, 0, 0,
+                        0, 1e-2, 0, 0, 0, 0,
+                        0, 0, 1e-6, 0, 0, 0,
+                        0, 0, 0, 1e-6, 0, 0,
+                        0, 0, 0, 0, 1e-6, 0,
+                        0, 0, 0, 0, 0, 1e-6]
+    
+
+    process_noise_covariance: [0.05, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0.05, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0.03, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0.03, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0.06, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0.025, 0,     0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+                                0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+
+# [ADVANCED] This represents the initial value for the state estimate error covariance matrix. Setting a diagonal value (variance) to a large value will result in rapid convergence for initial measurements of the variable in question. Users should take care not to use large values for variables that will not be measured directly. 
+
+# The values are ordered as x, y, z, roll, pitch, yaw, vx, vy, vz, vroll, vpitch, vyaw, ax, ay, az.
+# Defaults to the matrix below if unspecified.
+
+    initial_estimate_covariance: [1e-4, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    1e-4, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    1e-6, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,  0,     0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                                    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
+ekf_filter_node_map: #here is where i have to modify it, would it require the joint_state publisher?, it was originally simulated with no real imu source
+  ros__parameters:
+    use_sim_time: True
+    frequency: 30.0
+    sensor_timeout: 0.1
+    two_d_mode: true
+    #publish_tf: false  # Disable publishing of transforms
+    transform_time_offset: 0.0
+    transform_timeout: 0.0
+    print_diagnostics: true
+    debug: false
+
+    map_frame: map
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: map
+
+    odom0: gps/filtered
+    odom0_config: [true, true, false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false]
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+
+    odom0: sdv_localization/vectornav/odom
+    odom0_config: [true, true, false,
+                   false, false, true,
+                   true,  true,  false,
+                   false, false, false,
+                   false, false, false]
+    odom0_queue_size: 10
+    odom0_nodelay: true
+    odom0_differential: false
+    odom0_relative: false
+    
+    odom1: sdv_localization/sbg/odom
+    odom1_config: [true, true, false,
+                   false, false, true,
+                   true,  true,  false,
+                   false, false, false,
+                   false, false, false]
+    odom1_queue_size: 10
+    odom1_nodelay: true
+    odom1_differential: false
+    odom1_relative: false
+
+    process_noise_covariance: [0.01, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.01,  0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.01,  0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.01,   0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.01,   0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.01,  0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.01,   0.0,    0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.01,   0.0,    0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.01,   0.0,    0.0,
+                              0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.01,   0.0,
                               0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01]
-  
-  
-    initial_estimate_covariance: [0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.01,   0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,     0.0,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,     0.0,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,     0.0,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.01,    0.0,    0.0,
-                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.01,    0.0,
+
+    initial_estimate_covariance: [0.01, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.01, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.01, 0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    1.0,  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    1.0,  0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.01, 0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,  0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,  0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,  0.0,      0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.01,    0.0,     0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.01,    0.0,     0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.01,    0.0,    0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.01,   0.0,    0.0,
+                                  0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.01,  0.0,
                                   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.01]
-
-
 navsat_transform:
   ros__parameters:
     use_sim_time: true
@@ -600,10 +590,9 @@ navsat_transform:
     yaw_offset: 1.570796327  # IMU reads 0 facing magnetic north, not east
     zero_altitude: false
     broadcast_utm_transform: true
-    publish_filtered_gps: true
+    publish_filtered_gps: false
     use_odometry_yaw: false
     wait_for_datum: false
-
 
 #controller_manager:
 #  ros__parameters:

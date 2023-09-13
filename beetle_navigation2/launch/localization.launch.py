@@ -14,6 +14,7 @@ from nav2_common.launch import RewrittenYaml
 
 
 def generate_launch_description():
+    sdv_localization = FindPackageShare(package='sdv_localization').find('sdv_localization')
     # Get the launch directory
     beetle_nav_dir = FindPackageShare(package='beetle_navigation2').find('beetle_navigation2')
 
@@ -27,7 +28,7 @@ def generate_launch_description():
     use_respawn = LaunchConfiguration('use_respawn')
     log_level = LaunchConfiguration('log_level')
 
-    lifecycle_nodes = ['map_server']
+    lifecycle_nodes = ['map_server', 'amcl']
 
     # Create our own temporary YAML files that include substitutions
     param_substitutions = {
@@ -45,6 +46,17 @@ def generate_launch_description():
 
     declare_map_yaml_cmd = DeclareLaunchArgument(
         'map',
+        description='Full path to map yaml file to load')
+    
+    declare_map2_yaml_cmd = DeclareLaunchArgument(
+        'map2',
+        #default_value=os.path.join(beetle_nav_dir, 'maps', 'Field.yaml'),
+        #default_value=os.path.join(sdv_localization, 'maps', 'map.yaml'),
+        #default_value=os.path.join(sdv_localization, 'maps', 'carreta_map.yaml'),
+        default_value=os.path.join(sdv_localization, 'maps', 'carreta_raw_map.yaml'),
+        #default_value=os.path.join(sdv_localization, 'maps', '3.yaml'),
+
+        #default_value=os.path.join(sdv_localization, 'maps', 'aa.yaml'),
         description='Full path to map yaml file to load')
 
     declare_use_sim_time_cmd = DeclareLaunchArgument(
@@ -148,25 +160,38 @@ def generate_launch_description():
     #print(f"Value of use_ekf is {use_ekf}")
 
     start_ekf_local = Node(
-        condition=IfCondition(use_ekf),
-        package='robot_localization',
-        executable='ekf_node',
-        name='ekf_filter_node_odom',
-        output='screen',
-        parameters=[configured_params],
-        arguments=['--ros-args', '--log-level', log_level],
-        remappings=[('odometry/filtered', 'odometry/local')],
-    )
-     
+         condition=IfCondition(use_ekf),
+         package='robot_localization',
+         executable='ekf_node',
+         name='ekf_filter_node_odom',
+         output='screen',
+         parameters=[configured_params],
+         arguments=['--ros-args', '--log-level', log_level],
+         remappings=[('odometry/filtered', 'odometry/local'),
+                     ])
     start_ekf_global = Node(
-        condition=IfCondition(use_ekf),
-        package='robot_localization',
-        executable='ekf_node',
-        name='ekf_filter_node_map',
-        output='screen',
-        parameters=[configured_params],
-        arguments=['--ros-args', '--log-level', log_level],
-        remappings=[('odometry/filtered', 'odometry/global')])
+         condition=IfCondition(use_ekf),
+         package='robot_localization',
+         executable='ekf_node',
+         name='ekf_filter_node_map',
+         output='screen',
+         parameters=[configured_params],
+         arguments=['--ros-args', '--log-level', log_level],
+         remappings=[('odometry/filtered', 'odometry/global')])
+    start_navsat = Node(
+         condition=IfCondition(use_ekf),
+         package='robot_localization',
+         executable='navsat_transform_node',
+         name='navsat_transform',
+         output='screen',
+         parameters=[configured_params],
+         arguments=['--ros-args', '--log-level', log_level],
+         remappings=[('imu/data', 'vectornav/imu'),
+                     ('gps/fix', '/vectornav/gnss'),
+                     ('gps/filtered', 'gps/filtered'),
+                     ('odometry/gps', 'odometry/gps'),
+                     ('odometry/filtered', 'sdv_localization/vectornav/odom')
+                     ])
     
     start_navsat = Node(
         condition=IfCondition(use_ekf),
@@ -198,6 +223,7 @@ def generate_launch_description():
 
     # Declare the launch options
     ld.add_action(declare_map_yaml_cmd)
+    #ld.add_action(declare_map2_yaml_cmd)
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_params_file_cmd)
     ld.add_action(declare_autostart_cmd)
@@ -211,8 +237,9 @@ def generate_launch_description():
     ld.add_action(load_nodes)
     ld.add_action(load_composable_nodes)
     ld.add_action(start_ekf_local)
-    ld.add_action(start_ekf_global)
-    ld.add_action(start_navsat)
-    ld.add_action(start_mock_transformation)
+    #ld.add_action(start_ekf_global)
+    #ld.add_action(start_navsat)
+    #ld.add_action(start_mock_transformation)
+
 
     return ld
