@@ -98,9 +98,11 @@ bt_navigator:
     - nav2_back_up_cancel_bt_node
     - nav2_drive_on_heading_cancel_bt_node
 
+
 bt_navigator_navigate_through_poses_rclcpp_node:
   ros__parameters:
     use_sim_time: True
+
 
 bt_navigator_navigate_to_pose_rclcpp_node:
   ros__parameters:
@@ -120,11 +122,11 @@ controller_server:
     goal_checker_plugins: ["general_goal_checker"] # "precise_goal_checker"
     controller_plugins: ["FollowPath"]
 #I can fed the desired velocity to the logitudinal controller to not have a constant velocity
-    # Progress checker parameters
+   # Progress checker parameters
     progress_checker:
-     plugin: "nav2_controller::SimpleProgressChecker"
-     required_movement_radius: 0.5
-     movement_time_allowance: 10.0
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 10.0
     general_goal_checker:
       stateful: False
       plugin: "nav2_controller::SimpleGoalChecker"
@@ -153,9 +155,10 @@ controller_server:
       max_robot_pose_search_dist: 3.0
       use_interpolation: false
 
+
 local_costmap:
   local_costmap:
-    ros__parameters:
+      ros__parameters:
       update_frequency: 5.0
       publish_frequency: 5.0
       global_frame: odom
@@ -175,7 +178,7 @@ local_costmap:
         observation_sources: pointcloud
         combination_method: 1
         pointcloud:  # no frame set, uses frame from message
-          topic: /camera/points #use laser scan /scan
+          topic: scan #use laser scan /scan
           max_obstacle_height: 2.0
           min_obstacle_height: 0.1
           obstacle_max_range: 5.0
@@ -186,6 +189,7 @@ local_costmap:
           marking: True
           data_type: "PointCloud2"
       always_send_full_costmap: true
+
 
 global_costmap:
   global_costmap:
@@ -216,6 +220,7 @@ global_costmap:
         cost_scaling_factor: 20.0
       always_send_full_costmap: True
 
+
 map_server:
   ros__parameters:
     use_sim_time: false #false?
@@ -232,7 +237,6 @@ map_server:
 #     yaml_filename: "sdv_localization/sdv_localization/maps/carreta_raw_map.yaml"
 #     topic_name: map2
 
-
 #modifications in params, bringuo and nav.launch
 map_saver:
   ros__parameters:
@@ -241,6 +245,7 @@ map_saver:
     free_thresh_default: 0.25
     occupied_thresh_default: 0.65
     map_subscribe_transient_local: True
+
 
 planner_server:
   ros__parameters:
@@ -268,6 +273,7 @@ planner_server:
       lookup_table_size: 20.0             # Size of the dubin/reeds-sheep distance window to cache, in meters.
       cache_obstacle_heuristic: false     # Cache the obstacle map dynamic programming distance expansion heuristic between subsiquent replannings of the same goal location. Dramatically speeds up replanning performance (40x) if costmap is largely static.
       smooth_path: True                   # If true, does a simple and quick smoothing post-processing to the path
+
       map_topic: map
 
       smoother:
@@ -276,6 +282,7 @@ planner_server:
         w_data: 0.2
         tolerance: 1.0e-10
         do_refinement: true
+
 
 smoother_server:
   ros__parameters:
@@ -291,10 +298,11 @@ smoother_server:
       max_its: 1000
       do_refinement: True
 
+
 behavior_server:
   ros__parameters:
     costmap_topic: local_costmap/costmap_raw
-    footprint_topic: local_costmap/published_footprint
+    footprint_topic: local_costmap/published_footprint #check if it needs a footprint tf
     cycle_frequency: 10.0
     behavior_plugins: ["backup", "drive_on_heading", "wait"]
     backup:
@@ -312,9 +320,11 @@ behavior_server:
     min_rotational_vel: 0.1
     rotational_acc_lim: 1.2
 
+
 robot_state_publisher:
   ros__parameters:
     use_sim_time: True
+
 
 waypoint_follower:
   ros__parameters:
@@ -326,6 +336,7 @@ waypoint_follower:
       plugin: "nav2_waypoint_follower::WaitAtWaypoint"
       enabled: True
       waypoint_pause_duration: 200
+
 
 velocity_smoother:
   ros__parameters:
@@ -342,23 +353,25 @@ velocity_smoother:
     deadband_velocity: [0.0, 0.0, 0.0]
     velocity_timeout: 1.0
 
+
 ekf_filter_node_odom:
   ros__parameters:
     use_sim_time: True
     frequency: 30.0
     sensor_timeout: 0.1
     two_d_mode: true
-    publish_tf: false 
+    publish_tf: false
     transform_time_offset: 0.0
     transform_timeout: 0.0
     print_diagnostics: true
     debug: false
     #debug_out_file: /home/andresancal/planner/sdv_planner_simulation/catkin_ws/src/beetle/beetle_navigation2/config/debug.txt
 
+
     #permit_corrected_publication: false
 
+
     #publish_acceleration: false
-  
     map_frame: map
     odom_frame: odom
     base_link_frame: base_link
@@ -374,7 +387,6 @@ ekf_filter_node_odom:
     odom0_nodelay: true
     odom0_differential: false
     odom0_relative: true
-
     
     pose0: amcl_pose_ned
     pose0_config: [true,  true, false,
@@ -398,7 +410,25 @@ ekf_filter_node_odom:
     imu0_differential: false
     imu0_relative: false
     imu0_remove_gravitational_acceleration: true
-
+  
+  
+    imu1: sbg/imu/data #imu #change
+    imu1_config: [false, false, false,
+                  false,  false,  true,
+                  true, true, false,
+                  false,  false,  true, #just velocity
+                  true,  true,  false]
+    # imu1_config: [false, false, false, this is a possible config
+                  # false,  false,  true,
+                  # true, true, false,
+                  # false,  false,  true,
+                  # true,  true,  false]
+    imu1_nodelay: false
+    imu1_differential: false
+    imu1_relative: true
+    imu1_queue_size: 10
+    imu1_remove_gravitational_acceleration: true
+  
 
     # imu1: sbg/imu/data
     # imu1_config: [false, false, false,
@@ -527,7 +557,6 @@ ekf_filter_node_map: #here is where i have to modify it, would it require the jo
                                   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.01,   0.0,    0.0,
                                   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.01,  0.0,
                                   0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,    0.0,     0.0,     0.0,     0.0,    0.0,    0.01]
-
 navsat_transform:
   ros__parameters:
     use_sim_time: true
@@ -546,11 +575,14 @@ navsat_transform:
 #    update_rate: 60  # Hz
 #    use_sim_time: true
 
+
 #    joint_state_broadcaster:
 #      type: joint_state_broadcaster/JointStateBroadcaster
 
+
 #    ackermann_drive_base_controller:
 #      type: ackermann_drive_controller/AckermannDriveController
+
 
 #ackermann_drive_base_controller:
 #  ros__parameters:
@@ -559,17 +591,21 @@ navsat_transform:
 #    left_steering_name: "left_steering_joint"
 #    right_steering_name: "right_steering_joint"
 
+
 #    wheel_separation: 1.066
 #    wheel_radius: 0.250
 #    wheel_base: 1.190
 #    pivot_distance: 0.803
 
+
 #    max_steering_speed: 1.5707963267948966
 #    max_steering_angle: 0.7853981633974483
+
 
 #    wheel_separation_multiplier: 1.0
 #    left_wheel_radius_multiplier: 1.0
 #    right_wheel_radius_multiplier: 1.0
+
 
 #    publish_rate: 50.0
 #    odom_frame_id: odom
@@ -577,25 +613,29 @@ navsat_transform:
 #    pose_covariance_diagonal : [0.001, 0.001, 0.0, 0.0, 0.0, 0.01]
 #    twist_covariance_diagonal: [0.001, 0.0, 0.0, 0.0, 0.0, 0.01]
 
+
 #    open_loop: false
 #    enable_odom_tf: true
 
-#    cmd_vel_timeout: 0.5
-    #publish_limited_velocity: true
-#    use_stamped_vel: false
-    #velocity_rolling_window_size: 10
 
-    # Velocity and acceleration limits
-    # Whenever a min_* is unspecified, default to -max_*
+#    cmd_vel_timeout: 0.5
+   #publish_limited_velocity: true
+#    use_stamped_vel: false
+   #velocity_rolling_window_size: 10
+
+
+   # Velocity and acceleration limits
+   # Whenever a min_* is unspecified, default to -max_*
 #    linear.x.has_velocity_limits: true
 #    linear.x.has_acceleration_limits: true
 #    linear.x.has_jerk_limits: false
-    # Physicial Car Max Velocity: 2.7
+   # Physicial Car Max Velocity: 2.7
 #    linear.x.max_velocity: 0.4
 #    linear.x.min_velocity: 0.0
 #    linear.x.max_acceleration: 0.4
 #    linear.x.max_jerk: 0.0
 #    linear.x.min_jerk: 0.0
+
 
 #    angular.z.has_velocity_limits: true
 #    angular.z.has_acceleration_limits: true

@@ -193,7 +193,20 @@ def generate_launch_description():
                      ('odometry/filtered', 'sdv_localization/vectornav/odom')
                      ])
     
-    
+    start_navsat = Node(
+        condition=IfCondition(use_ekf),
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform',
+        output='screen',
+        parameters=[configured_params],
+        arguments=['--ros-args', '--log-level', log_level],
+        remappings=[('imu/data', 'sbg/imu/data'),
+                    ('gps/fix', 'sbg/imu/nav_sat_fix'),
+                    ('gps/filtered', 'gps/filtered'),
+                    ('odometry/gps', 'odometry/gps'),
+                    ('odometry/filtered', 'odometry/global')
+                    ])
 
     start_mock_transformation = Node(
         condition=UnlessCondition(use_ekf),
@@ -227,5 +240,6 @@ def generate_launch_description():
     #ld.add_action(start_ekf_global)
     #ld.add_action(start_navsat)
     #ld.add_action(start_mock_transformation)
+
 
     return ld
